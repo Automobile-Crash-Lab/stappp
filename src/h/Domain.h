@@ -3,19 +3,32 @@
 /*     Computational Dynamics Laboratory                                     */
 /*     School of Aerospace Engineering, Tsinghua University                  */
 /*                                                                           */
-/*     Release 1.11, November 22, 2017                                       */
+/*     Release 1.02, October 27, 2017                                        */
 /*                                                                           */
 /*     http://www.comdyn.cn/                                                 */
 /*****************************************************************************/
 
 #pragma once
 
+#include <string>
+#include <fstream>
+#include <vector>
+
 #include "Node.h"
+#include "Bar.h"
+#include "4Q.h"
+#include "8H.h"
+#include "3T.h"
+#include "Beam.h"
+#include "Plate.h"
+#include "Shell.h"
 #include "ElementGroup.h"
 #include "Outputter.h"
 #include "Solver.h"
 #include "LoadCaseData.h"
 #include "SkylineMatrix.h"
+#include "Bandwidth.h"
+#include "Solver_Sparse.h"
 
 using namespace std;
 
@@ -67,13 +80,25 @@ private:
 //!	Total number of equations in the system
 	unsigned int NEQ;
 
+//!	Number of elements in banded global stiffness matrix
+	unsigned int NWK;
+
+//!	Maximum half bandwith
+	unsigned int MK;
+
 //!	Banded stiffness matrix
 /*! A one-dimensional array storing only the elements below the	skyline of the 
     global stiffness matrix. */
     CSkylineMatrix<double>* StiffnessMatrix;
+    
+    Solver_Sparse* solver;
 
 //!	Global nodal force/displacement vector
 	double* Force;
+	double Gravity;
+
+//! new order of degree of freedom;
+	unsigned int* Order;
 
 public:
 
@@ -98,11 +123,26 @@ public:
 //!	Read element data
 	bool ReadElements();
 
+	// 	//!	Read bar element data from the input data file
+	// bool ReadBarElementData(unsigned int EleGrp);
+
+	// //!	Read 4Q element data from the input data file
+	// bool Read4QElementData(unsigned int EleGrp);
+
 //!	Calculate global equation numbers corresponding to every degree of freedom of each node
 	void CalculateEquationNumber();
 
+//!	Calculate global equation numbers corresponding to every degree of freedom of each node
+	void RefreshEquationNumber();
+
 //!	Calculate column heights
 	void CalculateColumnHeights();
+
+//!	Calculate address of diagonal elements in banded matrix
+	void CalculateDiagnoalAddress();
+
+//! Halfband optimization using GPS method
+	void GPS();
 
 //! Allocate storage for matrices
 /*!	Allocate Force, ColumnHeights, DiagonalAddress and StiffnessMatrix and 
@@ -111,6 +151,9 @@ public:
 
 //!	Assemble the banded gloabl stiffness matrix
 	void AssembleStiffnessMatrix();
+
+//! Assemble the sparse gloabl stiffness matrix
+	void AssembleSparseSymmetricStiffnessMatrix();
 
 //!	Assemble the global nodal force vector for load case LoadCase
 	bool AssembleForce(unsigned int LoadCase); 
@@ -127,6 +170,12 @@ public:
 //!	Return the total number of nodal points
 	inline unsigned int GetNUMNP() { return NUMNP; }
 
+//!	Return the number of banded global stiffness matrix elements
+	inline unsigned int GetNWK() { return NWK; }
+
+//!	Return the maximum half bandwith
+	inline unsigned int GetMK() { return MK; }
+
 //!	Return the node list
 	inline CNode* GetNodeList() { return NodeList; }
 
@@ -135,6 +184,9 @@ public:
 
 //! Return element group list
     CElementGroup* GetEleGrpList() { return EleGrpList; }
+	
+	//!	Return the node list
+	inline unsigned int* GetOrder() { return Order; }
 
 //!	Return pointer to the global nodal force vector
 	inline double* GetForce() { return Force; }
@@ -153,5 +205,7 @@ public:
 
 //!	Return pointer to the banded stiffness matrix
 	inline CSkylineMatrix<double>* GetStiffnessMatrix() { return StiffnessMatrix; }
+
+	inline Solver_Sparse* GetSparseSolver() {return solver;}
 
 };

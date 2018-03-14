@@ -3,7 +3,7 @@
 /*     Computational Dynamics Laboratory                                     */
 /*     School of Aerospace Engineering, Tsinghua University                  */
 /*                                                                           */
-/*     Release 1.02, October 27, 2017                                        */
+/*     Release 1.11, November 22, 2017                                       */
 /*                                                                           */
 /*     http://www.comdyn.cn/                                                 */
 /*****************************************************************************/
@@ -15,15 +15,15 @@
 using namespace std;
 
 //! Bar element class
-class CBar : public CElement
+class CPlate : public CElement
 {
 public:
 
 //!	Constructor
-	CBar();
+	CPlate();
 
 //!	Desconstructor
-	~CBar();
+	~CPlate();
 
 //!	Read element data from stream Input
 	virtual bool Read(ifstream& Input, unsigned int Ele, CMaterial* MaterialSets, CNode* NodeList);
@@ -38,14 +38,12 @@ public:
 //!	Calculate element stiffness matrix
 	virtual void ElementStiffness(double* Matrix);
 
-//!	Calculate element stress
-	virtual void ElementStress(double* stress, double* Displacement);
-
 //!	Calculate element gravity force
 	virtual void ElementGravity(double* bodyforce, double Gravity);
 
+//!	Calculate element stress
+	virtual void ElementStress(double* stress, double* Displacement);
+
 //!	Return the size of the element stiffness matrix (stored as an array column by column)
 	virtual unsigned int SizeOfStiffnessMatrix();
-	
-	virtual double GetLength();
 };

@@ -3,7 +3,7 @@
 /*     Computational Dynamics Laboratory                                     */
 /*     School of Aerospace Engineering, Tsinghua University                  */
 /*                                                                           */
-/*     Release 1.11, November 22, 2017                                       */
+/*     Release 1.02, October 27, 2017                                        */
 /*                                                                           */
 /*     http://www.comdyn.cn/                                                 */
 /*****************************************************************************/
@@ -22,6 +22,9 @@ CNode::CNode(double X, double Y, double Z)
     bcode[0] = 0;	// Boundary codes
     bcode[1] = 0;
     bcode[2] = 0;
+	bcode[3] = 0;
+	bcode[4] = 0;
+	bcode[5] = 0;
 };
 
 //	Read element data from stream Input
@@ -41,8 +44,7 @@ bool CNode::Read(ifstream& Input, unsigned int np)
 
 	NodeNumber = N;
 
-	Input >> bcode[0] >> bcode[1] >> bcode[2]
-		  >> XYZ[0] >> XYZ[1] >> XYZ[2];
+	Input >> bcode[0] >> bcode[1] >> bcode[2]>> bcode[3] >> bcode[4] >> bcode[5] >> XYZ[0] >> XYZ[1] >> XYZ[2];
 
 	return true;
 }

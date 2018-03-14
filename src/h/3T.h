@@ -3,11 +3,15 @@
 /*     Computational Dynamics Laboratory                                     */
 /*     School of Aerospace Engineering, Tsinghua University                  */
 /*                                                                           */
-/*     Release 1.02, October 27, 2017                                        */
+/*     Release 1.0, October 14, 2017                                         */
 /*                                                                           */
 /*     http://www.comdyn.cn/                                                 */
 /*****************************************************************************/
-
+/*                                                                           */
+/*     Xiao Feiyu                                        */
+/*     3T	2017                                                                      */
+/*                                                    */
+/*****************************************************************************/
 #pragma once
 
 #include "Element.h"
@@ -15,20 +19,23 @@
 using namespace std;
 
 //! Bar element class
-class CBar : public CElement
+class C3T : public CElement
 {
 public:
+	double* location;
+public:
+
 
 //!	Constructor
-	CBar();
+	C3T();
 
 //!	Desconstructor
-	~CBar();
+	~C3T();
 
 //!	Read element data from stream Input
 	virtual bool Read(ifstream& Input, unsigned int Ele, CMaterial* MaterialSets, CNode* NodeList);
 
-//!	Write element data to stream
+//!	Write element data to stream OutputFile
 	virtual void Write(COutputter& output, unsigned int Ele);
 
 //! Generate location matrix: the global equation number that corresponding to each DOF of the element
@@ -38,14 +45,13 @@ public:
 //!	Calculate element stiffness matrix
 	virtual void ElementStiffness(double* Matrix);
 
-//!	Calculate element stress
-	virtual void ElementStress(double* stress, double* Displacement);
-
 //!	Calculate element gravity force
 	virtual void ElementGravity(double* bodyforce, double Gravity);
 
+//!	Calculate element stress
+	virtual void ElementStress(double* stress, double* Displacement);
+
 //!	Return the size of the element stiffness matrix (stored as an array column by column)
 	virtual unsigned int SizeOfStiffnessMatrix();
-	
-	virtual double GetLength();
+    
 };

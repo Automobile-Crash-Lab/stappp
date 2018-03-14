@@ -8,8 +8,17 @@
 /*     http://www.comdyn.cn/                                                 */
 /*****************************************************************************/
 
+#include <string>
+#include <iostream>
+
 #include "Domain.h"
 #include "Bar.h"
+#include "4Q.h"
+#include "3T.h"
+#include "8H.h"
+#include "Beam.h"
+#include "Plate.h"
+#include "Shell.h"
 #include "Outputter.h"
 #include "Clock.h"
 
@@ -55,58 +64,119 @@ int main(int argc, char *argv[])
     
     double time_input = timer.ElapsedTime();
 
+//  Bandwidth optimization using GPS method
+//  Bandwidth optimization will only be operated if MODEX == 2
+	if(FEMData->GetMODEX() == 2)
+		FEMData->GPS();
+
 //  Allocate global vectors and matrices, such as the Force, ColumnHeights,
 //  DiagonalAddress and StiffnessMatrix, and calculate the column heights
 //  and address of diagonal elements
-	FEMData->AllocateMatrices();
+    double time_assemble = timer.ElapsedTime();
+    double* time_solution;
+    double* time_stress;
+    time_solution = new double[FEMData->GetNLCASE()];
+    time_stress = new double[FEMData->GetNLCASE()];
+    COutputter* Output = COutputter::Instance();
+    
     
 //  Assemble the banded gloabl stiffness matrix
-	FEMData->AssembleStiffnessMatrix();
+if(FEMData->GetMODEX() == 3){
+	FEMData->AssembleSparseSymmetricStiffnessMatrix();
+    time_assemble = timer.ElapsedTime();
+    Solver_Sparse* Solver_SP=FEMData->GetSparseSolver();
+    Solver_SP->LDLT();
+
+    //  Loop over for all load cases
+    for (unsigned int lcase = 0; lcase < FEMData->GetNLCASE(); lcase++)
+    {
+        // Assemble righ-hand-side vector (force vector)
+        FEMData->AssembleForce(lcase + 1);
+        
+        Solver_SP->BackSubstitution(FEMData->GetForce());
+        
+        time_solution[lcase] = timer.ElapsedTime();
+        
+        //Output->PrintDisplacement(lcase);
+        
+        Output->OutputNodalDisplacement(lcase);
     
-    double time_assemble = timer.ElapsedTime();
+        
+        // Calculate and output stresses of all elements
+        //Output->OutputElementStress();
+        
+        time_stress[lcase] = timer.ElapsedTime();
+    }
+    
+    timer.Stop();
+    
+    //释放内存空间
+    Solver_SP->release();
+    
+}
+else{
+    FEMData->AllocateMatrices();
+    FEMData->AssembleStiffnessMatrix();
 
 //  Solve the linear equilibrium equations for displacements
+    
 	CLDLTSolver* Solver = new CLDLTSolver(FEMData->GetStiffnessMatrix());
     
 //  Perform L*D*L(T) factorization of stiffness matrix
     Solver->LDLT();
 
-    COutputter* Output = COutputter::Instance();
-
 #ifdef _DEBUG_
-    Output->PrintStiffnessMatrix();
+    //Output->PrintStiffnessMatrix();
 #endif
-        
+
 //  Loop over for all load cases
     for (unsigned int lcase = 0; lcase < FEMData->GetNLCASE(); lcase++)
     {
-//      Assemble righ-hand-side vector (force vector)
+        // Assemble righ-hand-side vector (force vector)
         FEMData->AssembleForce(lcase + 1);
-            
-//      Reduce right-hand-side force vector and back substitute
+
+        //  Reduce right-hand-side force vector and back substitute
         Solver->BackSubstitution(FEMData->GetForce());
-            
+
 #ifdef _DEBUG_
         Output->PrintDisplacement(lcase);
 #endif
             
         Output->OutputNodalDisplacement(lcase);
+
+        time_solution[lcase] = timer.ElapsedTime();
+
+        // Calculate and output stresses of all elements
+	    Output->OutputElementStress();
+
+        time_stress[lcase] = timer.ElapsedTime();
     }
-
-    double time_solution = timer.ElapsedTime();
-
-//  Calculate and output stresses of all elements
-	Output->OutputElementStress();
-    
-    double time_stress = timer.ElapsedTime();
     
     timer.Stop();
+}
     
     *Output << "\n S O L U T I O N   T I M E   L O G   I N   S E C \n\n"
             << "     TIME FOR INPUT PHASE = " << time_input << endl
-            << "     TIME FOR CALCULATION OF STIFFNESS MATRIX = " << time_assemble - time_input << endl
-            << "     TIME FOR FACTORIZATION AND LOAD CASE SOLUTIONS = " << time_solution - time_assemble << endl << endl
-            << "     T O T A L   S O L U T I O N   T I M E = " << time_stress << endl;
+            << "     TIME FOR CALCULATION OF STIFFNESS MATRIX = " << time_assemble - time_input << endl;
+    double time_solution_total = 0;
+    for(unsigned int lcase = 0; lcase < FEMData->GetNLCASE(); lcase++)
+    {
+        double time_lcase;
+        if (lcase == 0)
+        {
+            time_lcase = time_solution[lcase] - time_assemble;
+            *Output << "     TIME FOR FACTORIZATION AND LOAD CASE SOLUTIONS" << endl
+            << "     LOADCASE = " << lcase + 1 << "       TIME = " << time_lcase << endl;
+        }
+        else
+        {
+            time_lcase = time_solution[lcase] - time_solution[lcase-1];
+            *Output << "     LOADCASE = " << lcase + 1 << "       TIME = " << time_lcase << endl;
+        }
+        time_solution_total += time_lcase;
+    }
+            *Output << "     TOTAL TIME FOR FACTORIZATION AND LOAD CASE SOLUTIONS = " << time_solution_total << endl << endl
+            << "     T O T A L   S O L U T I O N   T I M E = " << time_stress[FEMData->GetNLCASE() - 1] << endl;
 
 	return 0;
 }

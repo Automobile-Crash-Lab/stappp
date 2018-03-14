@@ -12,6 +12,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -57,6 +58,21 @@ public:
 //!	Output bar element data
 	void PrintBarElementData(unsigned int EleGrp);
 
+//!	Output 3T element data
+	void Print3TElementData(unsigned int EleGrp);
+
+//!	Output 4Q element data
+	void Print4QElementData(unsigned int EleGrp);
+	
+	void Print8HElementData(unsigned int EleGrp);
+
+	void PrintBeamElementData(unsigned int EleGrp);
+//!	Output Plate element data
+	void PrintPlateElementData(unsigned int EleGrp);
+
+//!	Output Shell element data
+	void PrintShellElementData(unsigned int EleGrp);
+
 //!	Output load data 
 	void OutputLoadInfo(); 
 
@@ -73,7 +89,7 @@ public:
 	template <typename T>
 	COutputter& operator<<(const T& item) 
 	{
-		std::cout << item;
+		//std::cout << item;
 		OutputFile << item;
 		return *this;
 	}
@@ -81,11 +97,11 @@ public:
 	typedef std::basic_ostream<char, std::char_traits<char> > CharOstream;
 	COutputter& operator<<(CharOstream& (*op)(CharOstream&)) 
 	{
-		op(std::cout);
+		//op(std::cout);
 		op(OutputFile);
 		return *this;
 	}
-
+	
 #ifdef _DEBUG_
 
 //!	Print banded and full stiffness matrix for debuging

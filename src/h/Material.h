@@ -3,14 +3,16 @@
 /*     Computational Dynamics Laboratory                                     */
 /*     School of Aerospace Engineering, Tsinghua University                  */
 /*                                                                           */
-/*     Release 1.11, November 22, 2017                                       */
+/*     Release 1.0, October 14, 2017                                         */
 /*                                                                           */
 /*     http://www.comdyn.cn/                                                 */
 /*****************************************************************************/
 
 #pragma once
-
 #include "Outputter.h"
+#include <stddef.h>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -24,9 +26,10 @@ public:
 	
 	double E;  //!< Young's modulus
 
+	double rho;
 public:
 
-//! Virtual deconstructor
+	//! Virtual deconstructor
     virtual ~CMaterial() {};
 
 //!	Read material data from stream Input
@@ -49,6 +52,112 @@ public:
 //!	Read material data from stream Input
 	virtual bool Read(ifstream& Input, unsigned int mset);
 
+//!	Write material data to Stream 
+	virtual void Write(COutputter& output, unsigned int mset);
+};
+
+//!	Material class for 3T element
+class C3TMaterial : public CMaterial
+{
+public:
+
+	double mu;
+
+public:
+	
+//!	Read material data from stream Input
+	virtual bool Read(ifstream& Input, unsigned int mset);
+
+//!	Write material data to Stream OutputFile
+	virtual void Write(COutputter& output, unsigned int mset);
+};
+
+
+
+//!	Material class for 4Q element
+class C4QMaterial : public CMaterial
+{
+public:
+
+	double posi_rate;	//!< Sectional area of a 4Q element
+
+	double thickness;
+
+public:
+	
+//!	Read material data from stream Input
+	virtual bool Read(ifstream& Input, unsigned int mset);
+
+//!	Write material data to Stream OutputFile
+	virtual void Write(COutputter& output, unsigned int mset);
+};
+
+//!	Material class for 4Q element
+class CShellMaterial : public CMaterial
+{
+public:
+
+	double posi_rate;	//!< Sectional area of a 4Q element
+
+	double thickness;
+//!	Material class for Plate element
+public:
+	
+//!	Read material data from stream Input
+	virtual bool Read(ifstream& Input, unsigned int mset);
+
 //!	Write material data to Stream
+	virtual void Write(COutputter& output, unsigned int mset);
+
+};
+
+
+class CPlateMaterial : public CMaterial
+{
+public:
+
+	double nu;	//!< Possion raito
+
+	double thick;   //!< Thickness of the plate.
+
+public:
+	
+//!	Read material data from stream Input
+	virtual bool Read(ifstream& Input, unsigned int mset);
+
+//!	Write material data to Stream
+	virtual void Write(COutputter& output, unsigned int mset);
+};
+
+
+class C8HMaterial : public CMaterial
+{
+public:
+
+	double posi_ratio;	//!< Sectional area of a 8H element
+
+//!	Read material data from stream Input
+	virtual bool Read(ifstream& Input, unsigned int mset);
+
+//!	Write material data to Stream OutputFile
+	virtual void Write(COutputter& output, unsigned int mset);
+};
+
+class CBeamMaterial : public CMaterial
+{
+public:
+
+	double Iy;	//���Ծ�
+	double Iz;	//���Ծ�
+	double Ip;	//x������Ծ�
+	double v;	//Poisson Ratio
+	double Area;	//!< Sectional area of a bar element
+
+public:
+	
+//!	Read material data from stream Input
+	virtual bool Read(ifstream& Input, unsigned int mset);
+
+//!	Write material data to Stream OutputFile
 	virtual void Write(COutputter& output, unsigned int mset);
 };

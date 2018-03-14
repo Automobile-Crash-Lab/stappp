@@ -1,20 +1,17 @@
 /*==============================================================================
- MPM3D++
- C++ code for Three Dimensional Material Point Method
- ==============================================================================
- 
- Copyright (C) 2006 -
- 
- Computational Dynamics Group
- Department of Engineering Mechanics
- Tsinghua University
- Beijing 100084, P. R. China
- 
- Email: xzhang@tsinghua.edu.cn
- 
- ==============================================================================
- Definition of class 'Clock'
- ==============================================================================*/
+                                    MPM3D++
+           C++ code for Three Dimensional Material Point Method 
+  ==============================================================================
+
+   Copyright (C) 2006 - 
+
+   Computational Dynamics Group
+   Department of Engineering Mechanics
+   Tsinghua University
+   Beijing 100084, P. R. China
+
+   Email: xzhang@tsinghua.edu.cn
+*/
 
 #pragma once
 

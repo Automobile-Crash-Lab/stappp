@@ -3,7 +3,7 @@
 /*     Computational Dynamics Laboratory                                     */
 /*     School of Aerospace Engineering, Tsinghua University                  */
 /*                                                                           */
-/*     Release 1.11, November 22, 2017                                       */
+/*     Release 1.02, October 27, 2017                                        */
 /*                                                                           */
 /*     http://www.comdyn.cn/                                                 */
 /*****************************************************************************/
@@ -41,11 +41,10 @@ CElementGroup::~CElementGroup()
         delete [] MaterialList_;
 }
 
-//! operator []
-//! For the sake of efficiency, the index bounds are not checked
-CElement& CElementGroup::operator[](unsigned int i)
+//! Get the index-th element in this element group
+CElement& CElementGroup::GetElement(unsigned int index)
 {
-    return *(CElement*)((std::size_t)(ElementList_) + i*ElementSize_);
+    return *(CElement*)((std::size_t)(ElementList_) + index*ElementSize_);
 }
 
 //! Return index-th material in this element group
@@ -66,37 +65,96 @@ void CElementGroup::CalculateMemberSize()
             ElementSize_ = sizeof(CBar);
             MaterialSize_ = sizeof(CBarMaterial);
             break;
+        case ElementTypes::Q4:
+            ElementSize_ = sizeof(C4Q);
+            MaterialSize_ = sizeof(C4QMaterial);
+            break;
+        case ElementTypes::Plate:
+            ElementSize_ = sizeof(CPlate);
+            MaterialSize_ = sizeof(CPlateMaterial);
+            break;
+		case ElementTypes::T3:
+            ElementSize_ = sizeof(C3T);
+            MaterialSize_ = sizeof(C3TMaterial);
+            break;
+		case ElementTypes::Beam:
+            ElementSize_ = sizeof(CBeam);
+            MaterialSize_ = sizeof(CBeamMaterial);
+            break;
+        case ElementTypes::Shell:
+            ElementSize_ = sizeof(CShell);
+            MaterialSize_ = sizeof(CShellMaterial);
+		case ElementTypes::H8:
+            ElementSize_ = sizeof(C8H);
+            MaterialSize_ = sizeof(C8HMaterial);
+            break;
         default:
-            std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::CalculateMemberSize." << std::endl;
+            std::cerr << "Type " << ElementType_ << " not finished yet. See CElementGroup::CalculateMemberSize." << std::endl;
             exit(5);
             break;
     }
 }
 
 //! Allocate array of derived elements
-void CElementGroup::AllocateElements(std::size_t size)
+void CElementGroup::AllocateElement(std::size_t size)
 {
     switch(ElementType_)
     {
         case ElementTypes::Bar:
             ElementList_ = new CBar[size];
             break;
+        case ElementTypes::Q4:
+            ElementList_ = new C4Q[size];
+            break;
+        case ElementTypes::Plate:
+            ElementList_ = new CPlate[size];
+            break;
+        case ElementTypes::H8:
+            ElementList_ = new C8H[size];
+            break;
+		case ElementTypes::Beam:
+            ElementList_ = new CBeam[size];
+            break;
+		case ElementTypes::T3:
+            ElementList_ = new C3T[size];
+            break;
+        case ElementTypes::Shell:
+            ElementList_ = new CShell[size];
+            break;
         default:
-            std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::AllocateElement." << std::endl;
+            std::cerr << "Type " << ElementType_ << " not finished yet. See CElementGroup::AllocateElement." << std::endl;
             exit(5);
     }
 }
 
 //! Allocate array of derived materials
-void CElementGroup::AllocateMaterials(std::size_t size)
+void CElementGroup::AllocateMaterial(std::size_t size)
 {
     switch(ElementType_)
     {
         case ElementTypes::Bar:
             MaterialList_ = new CBarMaterial[size];
             break;
+        case ElementTypes::Q4:
+            MaterialList_ = new C4QMaterial[size];
+            break;
+		case ElementTypes::T3:
+            MaterialList_ = new C3TMaterial[size];
+            break;
+        case ElementTypes::H8:
+            MaterialList_ = new C8HMaterial[size];
+            break;
+		case ElementTypes::Beam:
+            MaterialList_ = new CBeamMaterial[size];
+            break; 
+        case ElementTypes::Plate:
+            MaterialList_ = new CPlateMaterial[size];
+            break; 
+        case ElementTypes::Shell:
+            MaterialList_ = new CShellMaterial[size];
+            break; 
         default:
-            std::cerr << "Type " << ElementType_ << " not available. See CElementGroup::AllocateMaterial." << std::endl;
+            std::cerr << "Type " << ElementType_ << " not finished yet. See CElementGroup::AllocateMaterial." << std::endl;
             exit(5);
     }
 }
@@ -118,7 +176,7 @@ bool CElementGroup::Read(ifstream& Input)
 bool CElementGroup::ReadElementData(ifstream& Input)
 {
 //  Read material/section property lines
-    AllocateMaterials(NUMMAT_);
+    AllocateMaterial(NUMMAT_);
     
 //  Loop over for all material property sets in this element group
     for (unsigned int mset = 0; mset < NUMMAT_; mset++)
@@ -126,11 +184,11 @@ bool CElementGroup::ReadElementData(ifstream& Input)
             return false;
     
 //  Read element data lines
-    AllocateElements(NUME_);
+    AllocateElement(NUME_);
     
 //  Loop over for all elements in this element group
     for (unsigned int Ele = 0; Ele < NUME_; Ele++)
-        if (!(*this)[Ele].Read(Input, Ele, MaterialList_, NodeList_))
+        if (!GetElement(Ele).Read(Input, Ele, MaterialList_, NodeList_))
             return false;
     
     return true;

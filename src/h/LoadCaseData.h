@@ -3,7 +3,7 @@
 /*     Computational Dynamics Laboratory                                     */
 /*     School of Aerospace Engineering, Tsinghua University                  */
 /*                                                                           */
-/*     Release 1.11, November 22, 2017                                       */
+/*     Release 1.02, October 27, 2017                                        */
 /*                                                                           */
 /*     http://www.comdyn.cn/                                                 */
 /*****************************************************************************/
@@ -11,6 +11,9 @@
 #pragma once
 
 #include "Outputter.h"
+
+#include <string>
+#include <fstream>
 
 using namespace std;
 

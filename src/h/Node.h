@@ -3,7 +3,7 @@
 /*     Computational Dynamics Laboratory                                     */
 /*     School of Aerospace Engineering, Tsinghua University                  */
 /*                                                                           */
-/*     Release 1.11, November 22, 2017                                       */
+/*     Release 1.02, October 27, 2017                                        */
 /*                                                                           */
 /*     http://www.comdyn.cn/                                                 */
 /*****************************************************************************/
@@ -11,6 +11,9 @@
 #pragma once
 
 #include "Outputter.h"
+
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -34,7 +37,7 @@ public:
 /*!		1: The corresponding degree of freedom in nonactive (not defined) */
 /*!	After call Domain::CalculateEquationNumber(), bcode stores the global equation number */
 /*!	corresponding to each degree of freedom of the node */
-	unsigned int bcode[NDF];
+	unsigned int bcode[6];
 
 //!	Constructor
 	CNode(double X = 0, double Y = 0, double Z = 0);
@@ -50,4 +53,5 @@ public:
 
 //!	Write nodal displacement
 	void WriteNodalDisplacement(COutputter& OutputFile, unsigned int np, double* Displacement);
+
 };
